@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import settings from '@/assets/icons/DockIcons/settings.png'
 import finder from '@/assets/icons/DockIcons/finder.png'
+import safari from '@/assets/icons/DockIcons/safari.png'
+import mail from '@/assets/icons/DockIcons/mail.png'
 import iterm from '@/assets/icons/DockIcons/terminal.png'
 import github from '@/assets/icons/DockIcons/github.png'
 import trash from '@/assets/icons/DockIcons/trash.png'
@@ -10,55 +12,99 @@ const emit = defineEmits(['openApp'])
 
 const apps = ref([
   { name: 'Finder', icon: finder },
-  { name: 'Safari', icon: '🌐' },
-  { name: 'Mail', icon: '✉️' },
-  { name: 'Messages', icon: '💬' },
+  { name: 'Safari', icon: safari },
+  { name: 'Mail', icon: mail },
+  { name: 'Messages', icon: finder },
   { name: 'Settings', icon: settings },
-  { name: 'Photos', icon: '📷' },
   { name: 'iTerm', icon: iterm },
   { name: 'GitHub', icon: github },
   { name: 'Trash', icon: trash },
 ])
 
+const dockRef = ref<HTMLElement | null>(null)
+const appRefs = ref<HTMLElement[]>([])
+const mouseX = ref<number | null>(null)
+const isHovered = ref(false)
 const hoveredApp = ref<string | null>(null)
 
-const handleOpen = (app: any) => {
-  emit('openApp', app)
+const getScaleForApp = (index: number) => {
+  if (mouseX.value === null) return 1
+  const el = appRefs.value[index]
+  if (!el) return 1
+
+  const rect = el.getBoundingClientRect()
+  const center = rect.left + rect.width / 2
+  const distance = Math.abs(mouseX.value - center)
+  const maxDistance = 140
+  const minScale = 1
+  const maxScale = 1.8
+
+  if (distance > maxDistance) return minScale
+  const normalized = 1 - distance / maxDistance
+  return minScale + normalized ** 2 * (maxScale - minScale)
 }
 
-const showLabel = (appName: string) => {
-  hoveredApp.value = appName
+const handleMouseMove = (e: MouseEvent) => {
+  mouseX.value = e.clientX
 }
+const handleMouseEnter = () => (isHovered.value = true)
+const handleMouseLeave = () => {
+  mouseX.value = null
+  isHovered.value = false
+}
+const handleOpen = (app: any) => emit('openApp', app)
 
-const hideLabel = () => {
-  hoveredApp.value = null
-}
+onMounted(() => {
+  nextTick(() => {
+    appRefs.value = Array.from(dockRef.value!.querySelectorAll('.dock-item'))
+  })
+  dockRef.value?.addEventListener('mousemove', handleMouseMove)
+  dockRef.value?.addEventListener('mouseenter', handleMouseEnter)
+  dockRef.value?.addEventListener('mouseleave', handleMouseLeave)
+})
+onUnmounted(() => {
+  dockRef.value?.removeEventListener('mousemove', handleMouseMove)
+  dockRef.value?.removeEventListener('mouseenter', handleMouseEnter)
+  dockRef.value?.removeEventListener('mouseleave', handleMouseLeave)
+})
 </script>
 
 <template>
-  <div class="mac-dock">
-    <div class="dock-container">
-      <div
-        v-for="app in apps"
-        :key="app.name"
-        class="dock-item"
-        @click="handleOpen(app)"
-        @mouseenter="showLabel(app.name)"
-        @mouseleave="hideLabel"
-      >
-        <transition name="fade">
-          <div v-if="hoveredApp === app.name" class="dock-tooltip">
-            {{ app.name }}
-          </div>
-        </transition>
+  <div
+    class="mac-dock"
+    ref="dockRef"
+    :style="{
+      transform: isHovered ? 'translateX(-50%) scale(1.2)' : 'translateX(-50%) scale(1)',
+      transition: 'transform 0.25s cubic-bezier(0.20, 1, 0.36, 1)',
+    }"
+  >
+    <div class="dock-inner">
+      <div class="dock-container">
+        <div
+          v-for="(app, i) in apps"
+          :key="app.name"
+          ref="appRefs"
+          class="dock-item"
+          @click="handleOpen(app)"
+          @mouseenter="hoveredApp = app.name"
+          @mouseleave="hoveredApp = null"
+          :style="{
+            transform: `
+              scale(${getScaleForApp(i)})
+              translateY(${(getScaleForApp(i) - 1) * -20}px)
+            `,
+            transition: 'transform 0.18s cubic-bezier(0.25, 1, 0.5, 1)',
+            willChange: 'transform',
+          }"
+        >
+          <transition name="fade">
+            <div v-if="hoveredApp === app.name" class="dock-tooltip">
+              {{ app.name }}
+            </div>
+          </transition>
 
-        <img
-          v-if="typeof app.icon === 'string' && app.icon.endsWith('.png')"
-          class="dock-icon"
-          :src="app.icon"
-          :alt="app.name"
-        />
-        <span v-else class="dock-emoji">{{ app.icon }}</span>
+          <img class="dock-icon" :src="app.icon" :alt="app.name" />
+        </div>
       </div>
     </div>
   </div>
@@ -77,16 +123,20 @@ const hideLabel = () => {
   border-radius: 18px;
   padding: 8px 14px;
   z-index: 30;
-  transition: transform 0.3s ease;
+  transform-origin: bottom center;
 }
 
-.mac-dock:hover {
-  transform: translateX(-50%) scale(1.02);
+.dock-inner {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  overflow: visible;
 }
 
 .dock-container {
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   gap: 12px;
 }
 
@@ -96,20 +146,15 @@ const hideLabel = () => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition:
-    transform 0.25s ease,
-    filter 0.25s ease;
-}
-
-.dock-item:hover {
-  transform: scale(1.3);
-  filter: brightness(1.2);
+  transform-origin: bottom center;
+  will-change: transform;
 }
 
 .dock-icon {
   width: 48px;
   height: 48px;
   object-fit: contain;
+  pointer-events: none;
 }
 
 .dock-emoji {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 
-const output = ref<string[]>([
+const output = ref<(string | { html: string })[]>([
   'Welcome to macOS Terminal 💻',
   'Type `help` to see available commands.',
 ])
@@ -10,8 +10,11 @@ const command = ref('')
 const history = ref<string[]>([])
 const historyIndex = ref(-1)
 const terminalRef = ref<HTMLDivElement | null>(null)
-
 const isDark = ref(true)
+
+function pushOutput(line: string | { html: string }) {
+  output.value.push(line)
+}
 
 function runCommand(cmd: string) {
   const parts = cmd.trim().split(' ')
@@ -20,18 +23,19 @@ function runCommand(cmd: string) {
 
   switch (base) {
     case 'help':
-      output.value.push('Available commands:')
-      output.value.push('  help       — Show this message')
-      output.value.push('  echo [txt] — Print your text')
-      output.value.push('  clear      — Clear the terminal')
-      output.value.push('  date       — Show current date/time')
-      output.value.push('  whoami     — Creator Info')
-      output.value.push('  abtme     — Creator Info')
-      output.value.push('  dark       — Toggle dark/light mode')
+      pushOutput('Available commands:')
+      pushOutput('  help       — Show this message')
+      pushOutput('  echo [txt] — Print your text')
+      pushOutput('  clear      — Clear the terminal')
+      pushOutput('  date       — Show current date/time')
+      pushOutput('  whoami     — Creator Info')
+      pushOutput('  abtme      — Creator Details')
+      pushOutput('  links      — View my social links')
+      pushOutput('  dark       — Toggle dark/light mode')
       break
 
     case 'echo':
-      output.value.push(args.join(' '))
+      pushOutput(args.join(' '))
       break
 
     case 'clear':
@@ -39,15 +43,30 @@ function runCommand(cmd: string) {
       break
 
     case 'date':
-      output.value.push(new Date().toString())
+      pushOutput(new Date().toString())
       break
 
     case 'whoami':
-      output.value.push('Mika Geshan')
+      pushOutput('Mika Geshan')
       break
 
     case 'abtme':
-      output.value.push('Mika Geshan')
+      pushOutput(
+        "Hi, I'm a Front-End Developer with a background in Software Engineering. Skilled in building user-friendly, modern interfaces and quick to adapt to new tools and environments. Experienced in front-end development, both independently and in teams, and able to work remotely or on-site as needed.",
+      )
+      break
+
+    case 'links':
+      pushOutput('My Social Links 🌐')
+      pushOutput({
+        html: `
+          <div class="links">
+            🟦 <a href="https://www.linkedin.com/in/mika-geshan-1741b7330" target="_blank">LinkedIn</a><br>
+            📷 <a href="https://www.instagram.com/noturfavmikaaa" target="_blank">Instagram</a><br>
+            🐙 <a href="https://github.com/MikaGeshan" target="_blank">GitHub</a><br>
+          </div>
+        `,
+      })
       break
 
     case 'dark':
@@ -58,7 +77,7 @@ function runCommand(cmd: string) {
       break
 
     default:
-      output.value.push(`command not found: ${base}`)
+      pushOutput(`command not found: ${base}`)
       break
   }
 
@@ -73,7 +92,7 @@ function runCommand(cmd: string) {
 function handleKeyDown(e: KeyboardEvent) {
   if (e.key === 'Enter') {
     e.preventDefault()
-    output.value.push(`❯ ${command.value}`)
+    pushOutput(`❯ ${command.value}`)
     runCommand(command.value)
     if (command.value.trim()) history.value.unshift(command.value)
     command.value = ''
@@ -97,7 +116,6 @@ function handleKeyDown(e: KeyboardEvent) {
       command.value = ''
     }
   } else if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
-    // handle normal typing
     command.value += e.key
   }
 }
@@ -118,10 +136,12 @@ onUnmounted(() => {
 <template>
   <div class="terminal-wrapper" :class="{ dark: isDark }" tabindex="0" @click="$el.focus()">
     <div class="terminal-body" ref="terminalRef">
-      <div v-for="(line, index) in output" :key="index" class="line">
-        {{ line }}
-      </div>
-
+      <div
+        v-for="(line, index) in output"
+        :key="index"
+        class="line"
+        v-html="typeof line === 'string' ? line : line.html"
+      />
       <div class="input-line">
         <span class="prompt">❯</span>
         <span class="command">{{ command }}</span>
@@ -188,14 +208,15 @@ onUnmounted(() => {
   animation: blink 1s infinite;
 }
 
-@keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  50.1%,
-  100% {
-    opacity: 0;
-  }
+.links a {
+  color: #3b82f6;
+  text-decoration: none;
+}
+.links a:hover {
+  text-decoration: underline;
+}
+
+.terminal-wrapper.dark .links a {
+  color: #60a5fa;
 }
 </style>
