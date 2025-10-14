@@ -5,7 +5,7 @@ import MacSidebar from '@/components/mac/MacSidebar.vue'
 import MacTopbar from '@/components/mac/MacTopbar.vue'
 import MacDock from '@/components/mac/MacDock.vue'
 import MainContent from '@/components/content/MainContent.vue'
-import { content } from '@/data/content'
+import { content } from '@/data/content/content'
 
 import MacTerminal from '@/components/apps/MacTerminal.vue'
 
@@ -28,19 +28,18 @@ function handleOpenApp(app: { name: string }) {
     case 'iTerm':
       component = MacTerminal
       break
+    case 'Safari':
+      window.open('https://portofolio-mika.vercel.app', '_blank')
+      return
 
     default:
       alert(`"${app.name}" is not available yet.`)
-      return
+      break
   }
 
   if (!openApps.value.find((a) => a.name === app.name)) {
     openApps.value.push({ name: app.name, component })
   }
-}
-
-function closeApp(name: string) {
-  openApps.value = openApps.value.filter((a) => a.name !== name)
 }
 </script>
 

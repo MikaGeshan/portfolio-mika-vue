@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { Wifi, Battery, Search } from 'lucide-vue-next'
+import MacIcons from './MacIcons.vue'
+import SwitchSVG from '../SVG/SwitchSVG.vue'
+import DeviceTypeSVG from '../SVG/DeviceTypeSVG.vue'
+import { top_bar_menu } from '@/data/menu/menu.top-bar'
 
 const time = ref('')
 
@@ -42,20 +45,17 @@ onUnmounted(() => {
 <template>
   <div class="mac-topbar">
     <div class="left">
-      <span class="apple-logo"></span>
-      <span class="menu-item">Finder</span>
-      <span class="menu-item">File</span>
-      <span class="menu-item">Edit</span>
-      <span class="menu-item">View</span>
-      <span class="menu-item">Go</span>
-      <span class="menu-item">Window</span>
-      <span class="menu-item">Help</span>
+      <MacIcons name="mdi:apple" size="20" color="#FFF" />
+      <template v-for="menu in top_bar_menu" :key="menu.name">
+        <span class="menu-item" :style="menu.name === 'Finder' ? 'font-weight: 800' : ''">
+          {{ menu.name }}
+        </span>
+      </template>
     </div>
 
     <div class="right">
-      <Wifi class="icon" />
-      <Battery class="icon" />
-      <Search class="icon" />
+      <DeviceTypeSVG class="icon" />
+      <SwitchSVG class="icon" />
       <span class="menu-item">{{ time }}</span>
     </div>
   </div>

@@ -14,7 +14,7 @@ const apps = ref([
   { name: 'Finder', icon: finder },
   { name: 'Safari', icon: safari },
   { name: 'Mail', icon: mail },
-  { name: 'Messages', icon: finder },
+  // { name: 'Messages', icon: finder },
   { name: 'Settings', icon: settings },
   { name: 'iTerm', icon: iterm },
   { name: 'GitHub', icon: github },

@@ -158,42 +158,66 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   font-family: 'SF Mono', Menlo, monospace;
+  font-size: 13px;
   color: #222;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-radius: 12px;
+  background: rgba(250, 250, 250, 0.6);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border-radius: 0 0 10px 10px;
   overflow: hidden;
   transition:
     background 0.3s ease,
     color 0.3s ease;
   outline: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.15);
 }
 
 .terminal-wrapper.dark {
-  background: rgba(30, 30, 30, 0.9);
-  color: #d1d5db;
+  background: rgba(20, 20, 20, 0.85);
+  color: #e5e7eb;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.5);
 }
 
 .terminal-body {
   flex: 1;
-  padding: 12px 16px;
+  padding: 14px 18px;
   overflow-y: auto;
   white-space: pre-wrap;
+  line-height: 1.45;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(150, 150, 150, 0.3) transparent;
+}
+
+.terminal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.terminal-body::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.25);
+  border-radius: 6px;
+}
+.terminal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 120, 0.5);
 }
 
 .line {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  word-wrap: break-word;
 }
 
 .input-line {
   display: flex;
   align-items: center;
+  margin-top: 2px;
 }
 
 .prompt {
   color: #22c55e;
   margin-right: 6px;
+  font-weight: 600;
 }
 
 .command {
@@ -205,18 +229,37 @@ onUnmounted(() => {
   height: 15px;
   background-color: currentColor;
   margin-left: 2px;
+  border-radius: 1px;
   animation: blink 1s infinite;
 }
 
-.links a {
-  color: #3b82f6;
-  text-decoration: none;
+.links {
+  margin-top: 4px;
 }
+
+.links a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+}
+
 .links a:hover {
   text-decoration: underline;
 }
 
 .terminal-wrapper.dark .links a {
   color: #60a5fa;
+}
+
+/* Cursor animation */
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 </style>
