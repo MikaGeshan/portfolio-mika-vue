@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { ref, nextTick, watch } from 'vue'
+
+// Components
 import MacWindow from '@/components/mac/MacWindow.vue'
 import MacSidebar from '@/components/mac/MacSidebar.vue'
 import MacTopbar from '@/components/mac/MacTopbar.vue'
 import MacDock from '@/components/mac/MacDock.vue'
 import MainContent from '@/components/content/MainContent.vue'
-import { content } from '@/data/content/content'
+import MacMenu from '@/components/mac/MacMenu.vue'
 
+// Context and Data
+import { content } from '@/data/content/content'
+import { menu_left_click } from '@/data/menu/menu.left-click'
+
+// Apps
 import MacTerminal from '@/components/apps/MacTerminal.vue'
 
 const active = ref('About Me')
@@ -41,10 +48,39 @@ function handleOpenApp(app: { name: string }) {
     openApps.value.push({ name: app.name, component })
   }
 }
+
+const showMenu = ref(false)
+const menuPosition = ref({ x: 0, y: 0 })
+
+function openContextMenu(event: MouseEvent) {
+  event.preventDefault()
+
+  const padding = 10
+  const menuWidth = 200
+  const menuHeight = 220
+
+  const x = Math.min(event.clientX, window.innerWidth - menuWidth - padding)
+  const y = Math.min(event.clientY, window.innerHeight - menuHeight - padding)
+
+  showMenu.value = true
+  menuPosition.value = { x, y }
+
+  nextTick(() => {
+    setTimeout(() => {
+      window.addEventListener('mousedown', closeContextMenuOnce, { once: true })
+    }, 10)
+  })
+}
+
+function closeContextMenuOnce() {
+  showMenu.value = false
+}
+
+window.addEventListener('click', () => (showMenu.value = false))
 </script>
 
 <template>
-  <div class="portfolio-container">
+  <div class="portfolio-container" @contextmenu.stop.prevent="openContextMenu">
     <MacTopbar />
 
     <MacWindow>
@@ -71,6 +107,16 @@ function handleOpenApp(app: { name: string }) {
     </div>
 
     <MacDock @openApp="handleOpenApp" />
+
+    <MacMenu
+      v-if="showMenu"
+      :style="{
+        top: `${menuPosition.y}px`,
+        left: `${menuPosition.x}px`,
+        position: 'absolute',
+      }"
+      :items="menu_left_click"
+    />
   </div>
 </template>
 
@@ -104,42 +150,24 @@ function handleOpenApp(app: { name: string }) {
   z-index: 0;
 }
 
-.window-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.08);
-  height: 30px;
+.mac-menu {
+  position: absolute;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(25px) saturate(180%);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: fadeIn 0.15s ease-out;
 }
 
-.buttons {
-  display: flex;
-  gap: 6px;
-}
-
-.buttons span {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.close {
-  background: #ff5f56;
-}
-
-.minimize {
-  background: #ffbd2e;
-}
-
-.maximize {
-  background: #27c93f;
-}
-
-.window-body {
-  height: calc(100% - 30px);
-  padding: 10px;
-  overflow: auto;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

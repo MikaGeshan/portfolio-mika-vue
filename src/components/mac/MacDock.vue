@@ -14,7 +14,6 @@ const apps = ref([
   { name: 'Finder', icon: finder },
   { name: 'Safari', icon: safari },
   { name: 'Mail', icon: mail },
-  // { name: 'Messages', icon: finder },
   { name: 'Settings', icon: settings },
   { name: 'iTerm', icon: iterm },
   { name: 'GitHub', icon: github },
@@ -35,18 +34,20 @@ const getScaleForApp = (index: number) => {
   const rect = el.getBoundingClientRect()
   const center = rect.left + rect.width / 2
   const distance = Math.abs(mouseX.value - center)
-  const maxDistance = 140
+  const maxDistance = 160
   const minScale = 1
   const maxScale = 1.8
 
   if (distance > maxDistance) return minScale
+
   const normalized = 1 - distance / maxDistance
-  return minScale + normalized ** 2 * (maxScale - minScale)
+  return minScale + Math.pow(normalized, 2.5) * (maxScale - minScale)
 }
 
 const handleMouseMove = (e: MouseEvent) => {
   mouseX.value = e.clientX
 }
+
 const handleMouseEnter = () => (isHovered.value = true)
 const handleMouseLeave = () => {
   mouseX.value = null
@@ -91,15 +92,17 @@ onUnmounted(() => {
           :style="{
             transform: `
               scale(${getScaleForApp(i)})
-              translateY(${(getScaleForApp(i) - 1) * -20}px)
+              translateY(${(getScaleForApp(i) - 1) * -25}px)
             `,
-            transition: 'transform 0.18s cubic-bezier(0.25, 1, 0.5, 1)',
+            transition: 'transform 0.12s cubic-bezier(0.25, 1, 0.5, 1)',
             willChange: 'transform',
           }"
         >
           <transition name="fade">
             <div v-if="hoveredApp === app.name" class="dock-tooltip">
-              {{ app.name }}
+              <div class="tooltip-icon">
+                <span class="tooltip-text">{{ app.name }}</span>
+              </div>
             </div>
           </transition>
 
@@ -116,14 +119,22 @@ onUnmounted(() => {
   bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(122, 122, 122, 0.6);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 18px;
-  padding: 8px 14px;
+  padding: 10px 18px;
   z-index: 30;
   transform-origin: bottom center;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    inset 0 0 10px rgba(255, 255, 255, 0.05);
 }
 
 .dock-inner {
@@ -137,7 +148,8 @@ onUnmounted(() => {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
+  padding: 2px 4px;
 }
 
 .dock-item {
@@ -147,37 +159,58 @@ onUnmounted(() => {
   justify-content: center;
   cursor: pointer;
   transform-origin: bottom center;
-  will-change: transform;
+  transition:
+    transform 0.22s cubic-bezier(0.25, 1, 0.5, 1),
+    filter 0.25s ease;
+  will-change: transform, filter;
+}
+
+.dock-item:hover .dock-icon {
+  filter: brightness(1.1) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25));
+  transform: translateY(-4px);
 }
 
 .dock-icon {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
   pointer-events: none;
-}
-
-.dock-emoji {
-  font-size: 42px;
-  line-height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.25s ease;
 }
 
 .dock-tooltip {
   position: absolute;
-  bottom: 70px;
-  background: rgba(30, 30, 30, 0.9);
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  white-space: nowrap;
+  bottom: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transform: translateY(10px);
   opacity: 0;
-  animation: tooltip-up 0.25s ease forwards;
+  animation: tooltip-up 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   pointer-events: none;
+}
+
+.tooltip-icon {
+  background: rgba(50, 50, 50, 0.9);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tooltip-text {
+  text-align: center;
+  font-weight: 500;
 }
 
 @keyframes tooltip-up {
@@ -189,7 +222,7 @@ onUnmounted(() => {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.25s ease;
 }
 .fade-enter-from,
 .fade-leave-to {
