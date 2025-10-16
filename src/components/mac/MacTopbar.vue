@@ -73,10 +73,8 @@ onUnmounted(() => {
   align-items: center;
   padding: 0 12px;
   font-size: 13px;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: #1e1e1e;
+  border-bottom: 1px solid #333333;
   color: white;
   z-index: 20;
 }
@@ -108,7 +106,7 @@ onUnmounted(() => {
   width: 15px;
   height: 15px;
   color: white;
-  opacity: 0.85;
+  opacity: 1;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }

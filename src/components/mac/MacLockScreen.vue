@@ -47,8 +47,6 @@ function unlock() {
 <template>
   <transition name="fade">
     <div v-if="locked" class="lockscreen" @click="unlock">
-      <div class="lockscreen-overlay"></div>
-
       <div class="clock-container">
         <div class="clock-date">{{ date }}</div>
         <div class="clock-time">{{ time }}</div>
@@ -67,11 +65,14 @@ function unlock() {
 .lockscreen {
   position: fixed;
   inset: 0;
-  background: url('@/assets/images/macbackground.jpg') center/cover no-repeat;
+  background-color: #1c1c1c;
+  background-image: url('@/assets/images/macbackground.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  backdrop-filter: blur(20px);
   z-index: 9999;
   color: #fff;
   font-family:
@@ -80,18 +81,12 @@ function unlock() {
   overflow: hidden;
   user-select: none;
   cursor: pointer;
-}
-
-.lockscreen-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(15px);
-  z-index: 0;
+  will-change: opacity;
+  transform: none;
+  backface-visibility: visible;
 }
 
 .clock-container {
-  z-index: 1;
   text-align: center;
   margin-top: 6vh;
 }
@@ -111,7 +106,6 @@ function unlock() {
 }
 
 .login-container {
-  z-index: 1;
   text-align: center;
   margin-bottom: 9vh;
 }
@@ -122,8 +116,7 @@ function unlock() {
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 0.8rem;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  border: 2px solid #fff;
 }
 
 .username {
@@ -137,11 +130,11 @@ function unlock() {
   opacity: 0.7;
 }
 
-/* Fade Animation */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.6s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

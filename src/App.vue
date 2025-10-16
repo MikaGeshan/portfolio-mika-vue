@@ -26,7 +26,13 @@ body,
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: transparent;
+
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {

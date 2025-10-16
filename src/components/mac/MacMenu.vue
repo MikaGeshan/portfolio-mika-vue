@@ -24,12 +24,12 @@ const props = defineProps<{
 .mac-menu {
   position: absolute;
   min-width: 200px;
-  background: #2f2f2f;
+  background: #2f2f2f; /* solid background */
   border-radius: 8px;
-  border: 1px solid #4a4a4a;
+  border: 1px solid #4a4a4a; /* solid border */
   box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.4),
-    inset 0 0 0.5px rgba(255, 255, 255, 0.05);
+    0 4px 12px #000000,
+    inset 0 0 0.5px #ffffff; /* solid shadows */
   overflow: hidden;
   color: #f5f5f7;
   font-size: 13px;

@@ -14,6 +14,10 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: 1.5rem;
+
+  background: #2a2a2a;
+  color: #f2f2f2;
+
   scrollbar-width: thin;
   scroll-behavior: smooth;
 }
@@ -23,12 +27,12 @@
 }
 
 .main-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.25);
+  background: #505050;
   border-radius: 3px;
 }
 
 .main-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: #6a6a6a;
 }
 
 .main-content > * {

@@ -23,14 +23,14 @@ import { educations } from '@/data/content/educations'
 }
 
 .education-item {
-  background: rgba(255, 255, 255, 0.05);
+  background: #1a1a1a;
   border-radius: 10px;
   padding: 1rem 1.25rem;
   transition: background 0.3s ease;
 }
 
 .education-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: #2a2a2a;
 }
 
 .education-item h3 {
@@ -42,19 +42,19 @@ import { educations } from '@/data/content/educations'
 
 .education-item .year {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: #b3b3b3;
   margin: 0.15rem 0;
 }
 
 .education-item .degree {
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: #d9d9d9;
   margin: 0.15rem 0;
 }
 
 .education-item .description {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: #e6e6e6;
   margin: 0.15rem 0;
 }
 </style>

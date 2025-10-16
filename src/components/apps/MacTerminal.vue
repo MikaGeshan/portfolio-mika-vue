@@ -33,29 +33,23 @@ function runCommand(cmd: string) {
       pushOutput('  links      — View my social links')
       pushOutput('  dark       — Toggle dark/light mode')
       break
-
     case 'echo':
       pushOutput(args.join(' '))
       break
-
     case 'clear':
       output.value = []
       break
-
     case 'date':
       pushOutput(new Date().toString())
       break
-
     case 'whoami':
       pushOutput('Mika Geshan')
       break
-
     case 'abtme':
       pushOutput(
         "Hi, I'm a Front-End Developer with a background in Software Engineering. Skilled in building user-friendly, modern interfaces and quick to adapt to new tools and environments. Experienced in front-end development, both independently and in teams, and able to work remotely or on-site as needed.",
       )
       break
-
     case 'links':
       pushOutput('My Social Links 🌐')
       pushOutput({
@@ -68,14 +62,11 @@ function runCommand(cmd: string) {
         `,
       })
       break
-
     case 'dark':
       toggleDarkMode()
       break
-
     case '':
       break
-
     default:
       pushOutput(`command not found: ${base}`)
       break
@@ -160,26 +151,15 @@ onUnmounted(() => {
   font-family: 'SF Mono', Menlo, monospace;
   font-size: 13px;
   color: #222;
-  background: rgba(250, 250, 250, 0.6);
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  background-color: #f5f5f5;
   border-radius: 0 0 10px 10px;
   overflow: hidden;
-  transition:
-    background 0.3s ease,
-    color 0.3s ease;
   outline: none;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.25),
-    inset 0 0 0 0.5px rgba(0, 0, 0, 0.15);
 }
 
 .terminal-wrapper.dark {
-  background: rgba(20, 20, 20, 0.85);
+  background-color: #121212;
   color: #e5e7eb;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 0 0 0.5px rgba(0, 0, 0, 0.5);
 }
 
 .terminal-body {
@@ -188,19 +168,6 @@ onUnmounted(() => {
   overflow-y: auto;
   white-space: pre-wrap;
   line-height: 1.45;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(150, 150, 150, 0.3) transparent;
-}
-
-.terminal-body::-webkit-scrollbar {
-  width: 6px;
-}
-.terminal-body::-webkit-scrollbar-thumb {
-  background: rgba(120, 120, 120, 0.25);
-  border-radius: 6px;
-}
-.terminal-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(120, 120, 120, 0.5);
 }
 
 .line {
@@ -251,7 +218,6 @@ onUnmounted(() => {
   color: #60a5fa;
 }
 
-/* Cursor animation */
 @keyframes blink {
   0%,
   50% {

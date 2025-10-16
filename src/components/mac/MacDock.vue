@@ -3,6 +3,8 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import settings from '@/assets/icons/DockIcons/settings.png'
 import finder from '@/assets/icons/DockIcons/finder.png'
 import safari from '@/assets/icons/DockIcons/safari.png'
+import calculator from '@/assets/icons/DockIcons/calculator.png'
+import notes from '@/assets/icons/DockIcons/notes.png'
 import mail from '@/assets/icons/DockIcons/mail.png'
 import iterm from '@/assets/icons/DockIcons/terminal.png'
 import github from '@/assets/icons/DockIcons/github.png'
@@ -13,6 +15,8 @@ const emit = defineEmits(['openApp'])
 const apps = ref([
   { name: 'Finder', icon: finder },
   { name: 'Safari', icon: safari },
+  { name: 'Calculator', icon: calculator },
+  { name: 'Notes', icon: notes },
   { name: 'Mail', icon: mail },
   { name: 'Settings', icon: settings },
   { name: 'iTerm', icon: iterm },
@@ -119,22 +123,12 @@ onUnmounted(() => {
   bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(122, 122, 122, 0.6);
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 18px;
+  background: #2d2d2d;
+  border-radius: 20px;
   padding: 10px 18px;
   z-index: 30;
   transform-origin: bottom center;
-  transition:
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    background 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.2),
-    inset 0 0 10px rgba(255, 255, 255, 0.05);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .dock-inner {
@@ -159,14 +153,12 @@ onUnmounted(() => {
   justify-content: center;
   cursor: pointer;
   transform-origin: bottom center;
-  transition:
-    transform 0.22s cubic-bezier(0.25, 1, 0.5, 1),
-    filter 0.25s ease;
-  will-change: transform, filter;
+  transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
 }
 
 .dock-item:hover .dock-icon {
-  filter: brightness(1.1) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.25));
+  filter: brightness(1.1);
   transform: translateY(-4px);
 }
 
@@ -193,15 +185,13 @@ onUnmounted(() => {
 }
 
 .tooltip-icon {
-  background: rgba(50, 50, 50, 0.9);
+  background: #333;
   color: #fff;
   padding: 6px 14px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   letter-spacing: 0.3px;
   display: inline-flex;
   align-items: center;

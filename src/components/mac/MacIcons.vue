@@ -58,7 +58,7 @@ function handleClickIcon() {
   bottom: -28px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(50, 50, 50, 0.9);
+  background: #323232;
   color: white;
   padding: 4px 8px;
   font-size: 12px;
