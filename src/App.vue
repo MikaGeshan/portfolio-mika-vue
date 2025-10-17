@@ -31,6 +31,7 @@ body,
     -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
   font-size: 14px;
   color: white;
+  background-color: #121212;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -46,5 +47,19 @@ body,
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+a {
+  color: #0ea5e9;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+section,
+.container {
+  padding: 1.5rem;
+  color: white;
 }
 </style>

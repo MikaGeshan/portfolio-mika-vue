@@ -14,29 +14,42 @@ import { menu_left_click } from '@/data/menu/menu.left-click'
 import MacTerminal from '@/components/apps/MacTerminal.vue'
 import MacSystemSettings from '@/components/apps/MacSystemSettings.vue'
 
-const openApps = ref<{ name: string; component: any }[]>([])
+interface OpenApp {
+  name: string
+  component: any
+  visible: boolean
+}
+
+const openApps = ref<OpenApp[]>([])
 
 function handleOpenApp(app: { name: string }) {
-  let component = null
-
-  switch (app.name) {
-    case 'iTerm':
-      component = MacTerminal
-      break
-    case 'Safari':
-      window.open('https://portofolio-mika.vercel.app', '_blank')
-      return
-    case 'System Settings':
-      component = MacSystemSettings
-      break
-    default:
-      alert(`"${app.name}" is not available yet.`)
-      return
+  if (app.name === 'Safari') {
+    window.open('https://portofolio-mika.vercel.app', '_blank')
+    return
   }
 
-  if (!openApps.value.find((a) => a.name === app.name)) {
-    openApps.value.push({ name: app.name, component })
+  const componentMap: Record<string, any> = {
+    iTerm: MacTerminal,
+    Settings: MacSystemSettings,
   }
+
+  const component = componentMap[app.name]
+  if (!component) {
+    alert(`"${app.name}" is not available yet.`)
+    return
+  }
+
+  const existing = openApps.value.find((a) => a.name === app.name)
+  if (existing) {
+    existing.visible = true
+    return
+  }
+
+  openApps.value.push({
+    name: app.name,
+    component,
+    visible: true,
+  })
 }
 
 const showMenu = ref(false)
@@ -72,12 +85,15 @@ window.addEventListener('click', () => (showMenu.value = false))
 <template>
   <div class="portfolio-container" @contextmenu.stop.prevent="openContextMenu">
     <MacTopbar />
-    <MacWindow title="System Settings" backgroundColor="#2d2d2d">
-      <MacSystemSettings />
-    </MacWindow>
 
+    <!-- Dynamically render all open apps -->
     <div v-for="app in openApps" :key="app.name" :style="{ zIndex: 100 + openApps.indexOf(app) }">
-      <MacWindow>
+      <MacWindow
+        :title="app.name"
+        :visible="app.visible"
+        backgroundColor="#2d2d2d"
+        @close="app.visible = false"
+      >
         <component :is="app.component" />
       </MacWindow>
     </div>
@@ -111,11 +127,6 @@ window.addEventListener('click', () => (showMenu.value = false))
   position: relative;
   overflow: hidden;
   color: white;
-}
-
-.portfolio-container::before {
-  content: '';
-  display: none;
 }
 
 .mac-menu {

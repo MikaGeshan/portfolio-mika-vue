@@ -12,7 +12,7 @@ const props = defineProps({
     type: Object,
     default: () => ({ x: 100, y: 100 }),
   },
-  visible: { type: Boolean, default: true },
+  visible: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'minimize', 'fullscreen'])

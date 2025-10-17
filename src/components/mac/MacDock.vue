@@ -38,7 +38,8 @@ const getScaleForApp = (index: number) => {
   const rect = el.getBoundingClientRect()
   const center = rect.left + rect.width / 2
   const distance = Math.abs(mouseX.value - center)
-  const maxDistance = 160
+
+  const maxDistance = 250
   const minScale = 1
   const maxScale = 1.8
 
@@ -57,7 +58,12 @@ const handleMouseLeave = () => {
   mouseX.value = null
   isHovered.value = false
 }
-const handleOpen = (app: any) => emit('openApp', app)
+const handleOpen = (app: any) => {
+  emit('openApp', {
+    ...app,
+    visible: true,
+  })
+}
 
 onMounted(() => {
   nextTick(() => {
