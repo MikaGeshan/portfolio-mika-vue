@@ -39,7 +39,7 @@ const getScaleForApp = (index: number) => {
   const center = rect.left + rect.width / 2
   const distance = Math.abs(mouseX.value - center)
 
-  const maxDistance = 250
+  const maxDistance = 500
   const minScale = 1
   const maxScale = 1.8
 
@@ -148,7 +148,7 @@ onUnmounted(() => {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 16px;
+  gap: 20px;
   padding: 2px 4px;
 }
 
@@ -193,12 +193,12 @@ onUnmounted(() => {
 .tooltip-icon {
   background: #333;
   color: #fff;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 10px;
   font-weight: 500;
   white-space: nowrap;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

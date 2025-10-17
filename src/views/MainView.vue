@@ -86,7 +86,6 @@ window.addEventListener('click', () => (showMenu.value = false))
   <div class="portfolio-container" @contextmenu.stop.prevent="openContextMenu">
     <MacTopbar />
 
-    <!-- Dynamically render all open apps -->
     <div v-for="app in openApps" :key="app.name" :style="{ zIndex: 100 + openApps.indexOf(app) }">
       <MacWindow
         :title="app.name"

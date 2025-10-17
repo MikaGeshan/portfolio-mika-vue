@@ -24,14 +24,12 @@ const props = defineProps<{
 .mac-menu {
   position: absolute;
   min-width: 200px;
-  background: #2f2f2f; /* solid background */
+  background: gray;
   border-radius: 8px;
-  border: 1px solid #4a4a4a; /* solid border */
-  box-shadow:
-    0 4px 12px #000000,
-    inset 0 0 0.5px #ffffff; /* solid shadows */
+  border: 1px solid #3a3a3a;
+  box-shadow: 0 4px 12px #000000;
   overflow: hidden;
-  color: #f5f5f7;
+  color: #f5f5f5;
   font-size: 13px;
   user-select: none;
   z-index: 999;
@@ -65,7 +63,7 @@ const props = defineProps<{
 }
 
 .mac-menu li + li {
-  border-top: 1px solid #404040;
+  border-top: 1px solid #3a3a3a;
 }
 
 @keyframes fadeIn {
