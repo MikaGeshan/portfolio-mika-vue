@@ -14,6 +14,7 @@ import { menu_left_click } from '@/data/menu/menu.left-click'
 // Apps
 import MacTerminal from '@/components/apps/MacTerminal.vue'
 import MacSystemSettings from '@/components/apps/MacSystemSettings.vue'
+import MacCalendar from '@/components/apps/MacCalendar.vue'
 import MacCalculator from '@/components/mac/MacCalculator.vue'
 
 interface OpenApp {
@@ -46,6 +47,12 @@ function handleOpenApp(app: { name: string }) {
       width: 400,
       height: 600,
       initialPosition: { x: 120, y: 70 },
+    },
+    Calendar: {
+      component: MacCalendar,
+      width: 760,
+      height: 650,
+      initialPosition: { x: 150, y: 70 },
     },
     iTerm: { component: MacTerminal },
     Settings: { component: MacSystemSettings },

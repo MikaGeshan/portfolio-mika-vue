@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { Icon } from '@iconify/vue'
 import settings from '@/assets/icons/DockIcons/settings.png'
 import finder from '@/assets/icons/DockIcons/finder.png'
 import safari from '@/assets/icons/DockIcons/safari.png'
@@ -9,20 +10,28 @@ import mail from '@/assets/icons/DockIcons/mail.png'
 import iterm from '@/assets/icons/DockIcons/terminal.png'
 import github from '@/assets/icons/DockIcons/github.png'
 import trash from '@/assets/icons/DockIcons/trash.png'
+import calendar from '@/assets/icons/DockIcons/calendar.png'
 
 const emit = defineEmits(['openApp'])
+
+interface DockApp {
+  name: string
+  icon?: string
+  iconName?: string
+}
 
 const apps = ref([
   { name: 'Finder', icon: finder },
   { name: 'Safari', icon: safari },
   { name: 'Calculator', icon: calculator },
+  { name: 'Calendar', iconName: calendar },
   { name: 'Notes', icon: notes },
   { name: 'Mail', icon: mail },
   { name: 'Settings', icon: settings },
   { name: 'iTerm', icon: iterm },
   { name: 'GitHub', icon: github },
   { name: 'Trash', icon: trash },
-])
+] satisfies DockApp[])
 
 const dockRef = ref<HTMLElement | null>(null)
 const appRefs = ref<HTMLElement[]>([])
@@ -58,7 +67,7 @@ const handleMouseLeave = () => {
   mouseX.value = null
   isHovered.value = false
 }
-const handleOpen = (app: any) => {
+const handleOpen = (app: DockApp) => {
   emit('openApp', {
     ...app,
     visible: true,
@@ -116,7 +125,10 @@ onUnmounted(() => {
             </div>
           </transition>
 
-          <img class="dock-icon" :src="app.icon" :alt="app.name" />
+          <img v-if="app.icon" class="dock-icon" :src="app.icon" :alt="app.name" />
+          <span v-else class="dock-icon icon-tile" aria-hidden="true">
+            <Icon :icon="app.iconName" width="38" height="38" />
+          </span>
         </div>
       </div>
     </div>
@@ -176,6 +188,16 @@ onUnmounted(() => {
   transition:
     transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
     filter 0.25s ease;
+}
+
+.icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: #fc3d39;
+  border-radius: 14px;
+  box-shadow: inset 0 -12px 20px rgba(130, 0, 0, 0.22);
 }
 
 .dock-tooltip {
