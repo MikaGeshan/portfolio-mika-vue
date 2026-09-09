@@ -95,13 +95,15 @@ function handleKeyDown(e: KeyboardEvent) {
     e.preventDefault()
     if (historyIndex.value + 1 < history.value.length) {
       historyIndex.value++
-      command.value = history.value[historyIndex.value]
+      const previousCommand = history.value[historyIndex.value]
+      if (previousCommand) command.value = previousCommand
     }
   } else if (e.key === 'ArrowDown') {
     e.preventDefault()
     if (historyIndex.value > 0) {
       historyIndex.value--
-      command.value = history.value[historyIndex.value]
+      const nextCommand = history.value[historyIndex.value]
+      if (nextCommand) command.value = nextCommand
     } else {
       historyIndex.value = -1
       command.value = ''

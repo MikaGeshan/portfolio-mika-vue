@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
+import type { Component } from 'vue'
 
 // Components
 import MacWindow from '@/components/mac/MacWindow.vue'
@@ -13,11 +14,22 @@ import { menu_left_click } from '@/data/menu/menu.left-click'
 // Apps
 import MacTerminal from '@/components/apps/MacTerminal.vue'
 import MacSystemSettings from '@/components/apps/MacSystemSettings.vue'
+import MacCalculator from '@/components/mac/MacCalculator.vue'
 
 interface OpenApp {
   name: string
-  component: any
+  component: Component
   visible: boolean
+  width?: number
+  height?: number
+  initialPosition?: { x: number; y: number }
+}
+
+interface AppDefinition {
+  component: Component
+  width?: number
+  height?: number
+  initialPosition?: { x: number; y: number }
 }
 
 const openApps = ref<OpenApp[]>([])
@@ -28,13 +40,19 @@ function handleOpenApp(app: { name: string }) {
     return
   }
 
-  const componentMap: Record<string, any> = {
-    iTerm: MacTerminal,
-    Settings: MacSystemSettings,
+  const componentMap: Record<string, AppDefinition> = {
+    Calculator: {
+      component: MacCalculator,
+      width: 400,
+      height: 600,
+      initialPosition: { x: 120, y: 70 },
+    },
+    iTerm: { component: MacTerminal },
+    Settings: { component: MacSystemSettings },
   }
 
-  const component = componentMap[app.name]
-  if (!component) {
+  const appDefinition = componentMap[app.name]
+  if (!appDefinition) {
     alert(`"${app.name}" is not available yet.`)
     return
   }
@@ -47,7 +65,7 @@ function handleOpenApp(app: { name: string }) {
 
   openApps.value.push({
     name: app.name,
-    component,
+    ...appDefinition,
     visible: true,
   })
 }
@@ -90,6 +108,9 @@ window.addEventListener('click', () => (showMenu.value = false))
       <MacWindow
         :title="app.name"
         :visible="app.visible"
+        :width="app.width"
+        :height="app.height"
+        :initialPosition="app.initialPosition"
         backgroundColor="#2d2d2d"
         @close="app.visible = false"
       >
