@@ -1,20 +1,49 @@
 <script lang="ts" setup>
-import { defineProps } from 'vue'
-
 interface MenuItem {
   name: string
+  shortcut?: string
+  disabled?: boolean
+  divider?: boolean
 }
 
-const props = defineProps<{
-  items: MenuItem[]
+const props = withDefaults(
+  defineProps<{
+    items: MenuItem[]
+    minWidth?: number
+  }>(),
+  {
+    minWidth: 220,
+  },
+)
+
+const emit = defineEmits<{
+  select: [item: MenuItem]
 }>()
+
+function handleSelect(item: MenuItem) {
+  if (item.disabled || item.divider) return
+  emit('select', item)
+}
 </script>
 
 <template>
-  <div class="mac-menu">
+  <div class="mac-menu" role="menu" :style="{ minWidth: `${props.minWidth}px` }">
     <ul>
-      <li v-for="(item, i) in props.items" :key="i">
-        <span>{{ item.name }}</span>
+      <li v-for="(item, index) in props.items" :key="`${item.name}-${index}`">
+        <div v-if="item.divider" class="menu-divider" role="separator" />
+
+        <button
+          v-else
+          type="button"
+          class="menu-row"
+          :class="{ disabled: item.disabled }"
+          :disabled="item.disabled"
+          role="menuitem"
+          @click="handleSelect(item)"
+        >
+          <span class="menu-label">{{ item.name }}</span>
+          <span v-if="item.shortcut" class="menu-shortcut">{{ item.shortcut }}</span>
+        </button>
       </li>
     </ul>
   </div>
@@ -23,18 +52,21 @@ const props = defineProps<{
 <style scoped>
 .mac-menu {
   position: absolute;
-  min-width: 200px;
-  background: gray;
-  border-radius: 8px;
-  border: 1px solid #3a3a3a;
-  box-shadow: 0 4px 12px #000000;
+  z-index: 999;
+  padding: 6px;
   overflow: hidden;
-  color: #f5f5f5;
+  color: #f5f5f7;
   font-size: 13px;
   user-select: none;
-  z-index: 999;
-  padding: 4px 0;
-  animation: fadeIn 0.15s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(38, 38, 42, 0.9);
+  box-shadow:
+    0 18px 46px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+  animation: menu-in 0.12s cubic-bezier(0.2, 1, 0.36, 1);
 }
 
 .mac-menu ul {
@@ -43,37 +75,66 @@ const props = defineProps<{
   padding: 0;
 }
 
-.mac-menu li {
-  display: flex;
+.menu-row {
+  width: 100%;
+  min-height: 26px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: flex-start;
-  padding: 6px 16px;
+  gap: 20px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
   cursor: default;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
 }
 
-.mac-menu li:hover {
-  background: #3c3c3c;
+.menu-row:not(.disabled):hover,
+.menu-row:not(.disabled):focus-visible {
+  outline: none;
+  background: #0a84ff;
+  color: #fff;
 }
 
-.mac-menu li:active {
-  background: #505050;
+.menu-row.disabled {
+  color: rgba(245, 245, 247, 0.38);
 }
 
-.mac-menu li + li {
-  border-top: 1px solid #3a3a3a;
+.menu-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-@keyframes fadeIn {
+.menu-shortcut {
+  color: rgba(245, 245, 247, 0.58);
+  font-size: 12px;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.menu-row:hover .menu-shortcut,
+.menu-row:focus-visible .menu-shortcut {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.menu-divider {
+  height: 1px;
+  margin: 5px 8px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+@keyframes menu-in {
   from {
     opacity: 0;
-    transform: scale(0.98);
+    transform: translateY(-4px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 </style>
