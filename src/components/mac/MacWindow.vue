@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeUnmount, watch, onMounted, computed } from 'vue'
+import { ref, onBeforeUnmount, watch, onMounted, computed, nextTick } from 'vue'
 import { X, Minus, Maximize2 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -137,11 +137,35 @@ onBeforeUnmount(() => {
 
 watch(
   () => props.visible,
-  (newVal) => (isVisible.value = newVal),
+  (newVal) => {
+    isVisible.value = newVal
+    if (newVal) nextTick(updateTransform)
+  },
+)
+
+watch(
+  () => props.initialPosition,
+  (newPosition) => {
+    position.value = { ...newPosition }
+    nextTick(updateTransform)
+  },
+  { deep: true },
+)
+
+watch(
+  () => [props.width, props.height],
+  ([newWidth, newHeight]) => {
+    size.value = {
+      width: Number(newWidth),
+      height: Number(newHeight),
+    }
+    nextTick(updateTransform)
+  },
 )
 
 const windowStyle = computed(() => ({
   background: props.backgroundColor,
+  zIndex: props.zIndex,
 }))
 </script>
 
@@ -180,6 +204,8 @@ const windowStyle = computed(() => ({
 <style scoped>
 .mac-window {
   position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
   background: #2d2d2d; /* solid dark gray */

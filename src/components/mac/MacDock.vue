@@ -11,13 +11,15 @@ import github from '@/assets/icons/DockIcons/github.png'
 import trash from '@/assets/icons/DockIcons/trash.png'
 import calendar from '@/assets/icons/DockIcons/calendar.png'
 
-const emit = defineEmits(['openApp'])
-
 interface DockApp {
   name: string
   icon: string
   separatorBefore?: boolean
 }
+
+const emit = defineEmits<{
+  openApp: [app: DockApp]
+}>()
 
 const apps = ref([
   { name: 'Finder', icon: finder },
@@ -74,10 +76,7 @@ function handleMouseLeave() {
 }
 
 function handleOpen(app: DockApp) {
-  emit('openApp', {
-    ...app,
-    visible: true,
-  })
+  emit('openApp', app)
 }
 </script>
 
@@ -131,9 +130,7 @@ function handleOpen(app: DockApp) {
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 24px;
   background: rgba(246, 247, 250, 0.2);
-  box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.34),
     inset 0 -1px 0 rgba(0, 0, 0, 0.16);
   backdrop-filter: blur(22px) saturate(1.35);
   -webkit-backdrop-filter: blur(22px) saturate(1.35);
@@ -163,8 +160,7 @@ function handleOpen(app: DockApp) {
   background: transparent;
   cursor: pointer;
   transform-origin: bottom center;
-  transition:
-    margin 0.14s cubic-bezier(0.2, 1, 0.36, 1),
+  transition: margin 0.14s cubic-bezier(0.2, 1, 0.36, 1),
     transform 0.14s cubic-bezier(0.2, 1, 0.36, 1);
   will-change: transform;
 }

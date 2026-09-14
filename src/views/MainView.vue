@@ -21,19 +21,61 @@ interface OpenApp {
   name: string
   component: Component
   visible: boolean
-  width?: number
-  height?: number
+  width: number
+  height: number
   initialPosition?: { x: number; y: number }
 }
 
 interface AppDefinition {
   component: Component
-  width?: number
-  height?: number
-  initialPosition?: { x: number; y: number }
+  width: number
+  height: number
 }
 
 const openApps = ref<OpenApp[]>([])
+
+const DESKTOP_PADDING = 24
+const TOPBAR_HEIGHT = 35
+const DOCK_SAFE_AREA = 124
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), Math.max(min, max))
+}
+
+function getCenteredWindowPosition(width: number, height: number) {
+  const viewportWidth = window.innerWidth
+  const viewportHeight = window.innerHeight
+  const minX = DESKTOP_PADDING
+  const maxX = viewportWidth - width - DESKTOP_PADDING
+  const minY = TOPBAR_HEIGHT + DESKTOP_PADDING
+  const maxY = viewportHeight - height - DOCK_SAFE_AREA
+
+  const x = clamp((viewportWidth - width) / 2, minX, maxX)
+  const y = clamp(
+    TOPBAR_HEIGHT + (viewportHeight - TOPBAR_HEIGHT - DOCK_SAFE_AREA - height) / 2,
+    minY,
+    maxY,
+  )
+
+  return { x: Math.round(x), y: Math.round(y) }
+}
+
+function getWindowSize(appDefinition: AppDefinition) {
+  const maxWidth = Math.max(400, window.innerWidth - DESKTOP_PADDING * 2)
+  const maxHeight = Math.max(
+    300,
+    window.innerHeight - TOPBAR_HEIGHT - DOCK_SAFE_AREA - DESKTOP_PADDING * 2,
+  )
+
+  return {
+    width: Math.min(appDefinition.width, maxWidth),
+    height: Math.min(appDefinition.height, maxHeight),
+  }
+}
+
+function closeApp(name: string) {
+  openApps.value = openApps.value.filter((app) => app.name !== name)
+}
 
 function handleOpenApp(app: { name: string }) {
   if (app.name === 'Safari') {
@@ -46,16 +88,22 @@ function handleOpenApp(app: { name: string }) {
       component: MacCalculator,
       width: 400,
       height: 600,
-      initialPosition: { x: 120, y: 70 },
     },
     Calendar: {
       component: MacCalendar,
       width: 760,
       height: 650,
-      initialPosition: { x: 150, y: 70 },
     },
-    iTerm: { component: MacTerminal },
-    Settings: { component: MacSystemSettings },
+    iTerm: {
+      component: MacTerminal,
+      width: 820,
+      height: 520,
+    },
+    Settings: {
+      component: MacSystemSettings,
+      width: 900,
+      height: 600,
+    },
   }
 
   const appDefinition = componentMap[app.name]
@@ -67,12 +115,18 @@ function handleOpenApp(app: { name: string }) {
   const existing = openApps.value.find((a) => a.name === app.name)
   if (existing) {
     existing.visible = true
+    openApps.value = [...openApps.value.filter((openApp) => openApp.name !== app.name), existing]
     return
   }
+
+  const windowSize = getWindowSize(appDefinition)
+  const initialPosition = getCenteredWindowPosition(windowSize.width, windowSize.height)
 
   openApps.value.push({
     name: app.name,
     ...appDefinition,
+    ...windowSize,
+    initialPosition,
     visible: true,
   })
 }
@@ -111,15 +165,21 @@ window.addEventListener('click', () => (showMenu.value = false))
   <div class="portfolio-container" @contextmenu.stop.prevent="openContextMenu">
     <MacTopbar />
 
-    <div v-for="app in openApps" :key="app.name" :style="{ zIndex: 100 + openApps.indexOf(app) }">
+    <div
+      v-for="app in openApps"
+      :key="app.name"
+      class="window-layer"
+      :style="{ zIndex: 10 + openApps.indexOf(app) }"
+    >
       <MacWindow
         :title="app.name"
         :visible="app.visible"
         :width="app.width"
         :height="app.height"
+        :zIndex="10 + openApps.indexOf(app)"
         :initialPosition="app.initialPosition"
         backgroundColor="#2d2d2d"
-        @close="app.visible = false"
+        @close="closeApp(app.name)"
       >
         <component :is="app.component" />
       </MacWindow>
@@ -154,6 +214,16 @@ window.addEventListener('click', () => (showMenu.value = false))
   position: relative;
   overflow: hidden;
   color: white;
+}
+
+.window-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.window-layer :deep(.mac-window) {
+  pointer-events: auto;
 }
 
 .mac-menu {
