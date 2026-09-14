@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { Icon } from '@iconify/vue'
+import { ref } from 'vue'
 import settings from '@/assets/icons/DockIcons/settings.png'
 import finder from '@/assets/icons/DockIcons/finder.png'
 import safari from '@/assets/icons/DockIcons/safari.png'
@@ -16,219 +15,210 @@ const emit = defineEmits(['openApp'])
 
 interface DockApp {
   name: string
-  icon?: string
-  iconName?: string
+  icon: string
+  separatorBefore?: boolean
 }
 
 const apps = ref([
   { name: 'Finder', icon: finder },
   { name: 'Safari', icon: safari },
   { name: 'Calculator', icon: calculator },
-  { name: 'Calendar', iconName: calendar },
+  { name: 'Calendar', icon: calendar },
   { name: 'Notes', icon: notes },
   { name: 'Mail', icon: mail },
   { name: 'Settings', icon: settings },
   { name: 'iTerm', icon: iterm },
   { name: 'GitHub', icon: github },
-  { name: 'Trash', icon: trash },
+  { name: 'Trash', icon: trash, separatorBefore: true },
 ] satisfies DockApp[])
 
-const dockRef = ref<HTMLElement | null>(null)
 const appRefs = ref<HTMLElement[]>([])
 const mouseX = ref<number | null>(null)
-const isHovered = ref(false)
 const hoveredApp = ref<string | null>(null)
 
-const getScaleForApp = (index: number) => {
+function getScaleForApp(index: number) {
   if (mouseX.value === null) return 1
+
   const el = appRefs.value[index]
   if (!el) return 1
 
   const rect = el.getBoundingClientRect()
   const center = rect.left + rect.width / 2
   const distance = Math.abs(mouseX.value - center)
+  const maxDistance = 130
+  const maxScale = 1.72
 
-  const maxDistance = 500
-  const minScale = 1
-  const maxScale = 1.8
-
-  if (distance > maxDistance) return minScale
+  if (distance > maxDistance) return 1
 
   const normalized = 1 - distance / maxDistance
-  return minScale + Math.pow(normalized, 2.5) * (maxScale - minScale)
+  return 1 + Math.pow(normalized, 2.2) * (maxScale - 1)
 }
 
-const handleMouseMove = (e: MouseEvent) => {
-  mouseX.value = e.clientX
+function getItemStyle(index: number) {
+  const scale = getScaleForApp(index)
+
+  return {
+    marginInline: `${Math.max(0, (scale - 1) * 8)}px`,
+    transform: `translateY(${(scale - 1) * -30}px) scale(${scale})`,
+    zIndex: Math.round(scale * 100),
+  }
 }
 
-const handleMouseEnter = () => (isHovered.value = true)
-const handleMouseLeave = () => {
+function handleMouseMove(event: MouseEvent) {
+  mouseX.value = event.clientX
+}
+
+function handleMouseLeave() {
   mouseX.value = null
-  isHovered.value = false
+  hoveredApp.value = null
 }
-const handleOpen = (app: DockApp) => {
+
+function handleOpen(app: DockApp) {
   emit('openApp', {
     ...app,
     visible: true,
   })
 }
-
-onMounted(() => {
-  nextTick(() => {
-    appRefs.value = Array.from(dockRef.value!.querySelectorAll('.dock-item'))
-  })
-  dockRef.value?.addEventListener('mousemove', handleMouseMove)
-  dockRef.value?.addEventListener('mouseenter', handleMouseEnter)
-  dockRef.value?.addEventListener('mouseleave', handleMouseLeave)
-})
-onUnmounted(() => {
-  dockRef.value?.removeEventListener('mousemove', handleMouseMove)
-  dockRef.value?.removeEventListener('mouseenter', handleMouseEnter)
-  dockRef.value?.removeEventListener('mouseleave', handleMouseLeave)
-})
 </script>
 
 <template>
-  <div
+  <nav
     class="mac-dock"
-    ref="dockRef"
-    :style="{
-      transform: isHovered ? 'translateX(-50%) scale(1.2)' : 'translateX(-50%) scale(1)',
-      transition: 'transform 0.25s cubic-bezier(0.20, 1, 0.36, 1)',
-    }"
+    aria-label="Dock"
+    @mousemove="handleMouseMove"
+    @mouseleave="handleMouseLeave"
   >
-    <div class="dock-inner">
-      <div class="dock-container">
-        <div
-          v-for="(app, i) in apps"
-          :key="app.name"
+    <div class="dock-container">
+      <template v-for="(app, index) in apps" :key="app.name">
+        <span v-if="app.separatorBefore" class="dock-separator" aria-hidden="true" />
+
+        <button
+          type="button"
           ref="appRefs"
           class="dock-item"
+          :aria-label="app.name"
+          :style="getItemStyle(index)"
           @click="handleOpen(app)"
           @mouseenter="hoveredApp = app.name"
+          @focus="hoveredApp = app.name"
           @mouseleave="hoveredApp = null"
-          :style="{
-            transform: `
-              scale(${getScaleForApp(i)})
-              translateY(${(getScaleForApp(i) - 1) * -25}px)
-            `,
-            transition: 'transform 0.12s cubic-bezier(0.25, 1, 0.5, 1)',
-            willChange: 'transform',
-          }"
+          @blur="hoveredApp = null"
         >
           <transition name="fade">
-            <div v-if="hoveredApp === app.name" class="dock-tooltip">
-              <div class="tooltip-icon">
-                <span class="tooltip-text">{{ app.name }}</span>
-              </div>
-            </div>
+            <span v-if="hoveredApp === app.name" class="dock-tooltip">
+              {{ app.name }}
+            </span>
           </transition>
 
-          <img v-if="app.icon" class="dock-icon" :src="app.icon" :alt="app.name" />
-          <span v-else class="dock-icon icon-tile" aria-hidden="true">
-            <Icon :icon="app.iconName" width="38" height="38" />
-          </span>
-        </div>
-      </div>
+          <img class="dock-icon" :src="app.icon" :alt="app.name" />
+        </button>
+      </template>
     </div>
-  </div>
+  </nav>
 </template>
 
 <style scoped>
 .mac-dock {
   position: absolute;
-  bottom: 18px;
+  bottom: 16px;
   left: 50%;
-  transform: translateX(-50%);
-  background: #2d2d2d;
-  border-radius: 20px;
-  padding: 10px 18px;
-  z-index: 30;
-  transform-origin: bottom center;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.dock-inner {
-  display: flex;
-  justify-content: center;
-  width: 100%;
+  max-width: calc(100vw - 24px);
+  padding: 7px 11px 9px;
   overflow: visible;
+  z-index: 30;
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 24px;
+  background: rgba(246, 247, 250, 0.2);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
 }
 
 .dock-container {
+  min-height: 72px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 20px;
-  padding: 2px 4px;
+  gap: 4px;
+  overflow: visible;
 }
 
 .dock-item {
   position: relative;
+  width: 64px;
+  height: 72px;
+  flex: 0 0 auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  padding: 0 3px 8px;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
   cursor: pointer;
   transform-origin: bottom center;
-  transition: transform 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+  transition:
+    margin 0.14s cubic-bezier(0.2, 1, 0.36, 1),
+    transform 0.14s cubic-bezier(0.2, 1, 0.36, 1);
   will-change: transform;
 }
 
-.dock-item:hover .dock-icon {
-  filter: brightness(1.1);
-  transform: translateY(-4px);
+.dock-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.94);
+  outline-offset: 4px;
 }
 
 .dock-icon {
-  width: 64px;
-  height: 64px;
+  width: 58px;
+  height: 58px;
   object-fit: contain;
   pointer-events: none;
-  transition:
-    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.25s ease;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.22));
+  transition: filter 0.18s ease;
 }
 
-.icon-tile {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: #fc3d39;
-  border-radius: 14px;
-  box-shadow: inset 0 -12px 20px rgba(130, 0, 0, 0.22);
+.dock-item:hover .dock-icon,
+.dock-item:focus-visible .dock-icon {
+  filter: brightness(1.08) drop-shadow(0 10px 12px rgba(0, 0, 0, 0.24));
+}
+
+.dock-separator {
+  width: 1px;
+  height: 46px;
+  flex: 0 0 auto;
+  margin: 0 8px 9px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.18);
 }
 
 .dock-tooltip {
   position: absolute;
-  bottom: 80px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  translate: -50% 0;
   transform: translateY(10px);
   opacity: 0;
-  animation: tooltip-up 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-  pointer-events: none;
-}
-
-.tooltip-icon {
-  background: #333;
-  color: #fff;
-  padding: 4px 10px;
-  border-radius: 10px;
-  font-size: 10px;
-  font-weight: 500;
-  white-space: nowrap;
-  letter-spacing: 0.2px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-.tooltip-text {
-  text-align: center;
+  padding: 5px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(38, 38, 40, 0.88);
+  color: #fff;
+  font-size: 12px;
   font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+  pointer-events: none;
+  animation: tooltip-up 0.16s cubic-bezier(0.2, 1, 0.36, 1) forwards;
 }
 
 @keyframes tooltip-up {
@@ -240,10 +230,40 @@ onUnmounted(() => {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.25s ease;
+  transition: opacity 0.18s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+@media (max-width: 720px) {
+  .mac-dock {
+    bottom: 10px;
+    padding: 6px 8px 7px;
+    border-radius: 20px;
+  }
+
+  .dock-container {
+    min-height: 58px;
+    gap: 1px;
+  }
+
+  .dock-item {
+    width: 50px;
+    height: 58px;
+    padding-bottom: 6px;
+  }
+
+  .dock-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .dock-separator {
+    height: 36px;
+    margin: 0 5px 8px;
+  }
 }
 </style>
